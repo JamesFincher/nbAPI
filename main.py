@@ -85,6 +85,9 @@ def create_github_file(file_path, file_content, commit_message):
         return response.json()['content']['html_url']
     else:
         raise HTTPException(status_code=response.status_code, detail="Error creating file on GitHub")
+@app.get('/')
+async def root():
+    return {"message": "Hello World... API is working fine"}
 
 @app.post("/create_notebook/")
 async def create_notebook(input_file: UploadFile = File(...), output: Optional[str] = 'output.ipynb'):
