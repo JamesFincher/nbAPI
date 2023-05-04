@@ -1,0 +1,90 @@
+Prompt:
+
+Generate multiple examples of how to use the "time" module in Python, including code examples with markdown formatting.
+
+#Summary of Notebook
+
+##Example 1 description
+
+example 1 code snippet
+##Example 2 description
+
+example 2 code snippet
+.......
+
+Result: 
+
+# Summary of Notebook
+
+## Example 1: Getting the current time
+
+In this example, we will learn how to get the current time using the time module in Python.
+
+```python
+import time
+
+current_time = time.time()
+
+print("Current Time:", current_time)
+```
+
+## Example 2: Converting timestamp to a structured time
+
+In this example, we will learn how to convert a timestamp to a structured time using the time module in Python.
+
+```python
+import time
+
+timestamp = 1628698080
+
+structured_time = time.gmtime(timestamp)
+
+print("Structured Time:", structured_time)
+```
+
+## Example 3: Formatting the current time as a string
+
+In this example, we'll learn how to use the time module in Python to display the current time in human-readable format.
+
+```python
+import time
+
+current_time = time.localtime()
+
+formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", current_time)
+
+print("Current Time Formatted:", formatted_time)
+```
+
+## Example 4: Sleeping (pausing) for a specified amount of time
+
+In this example, we will learn how to use the time module in Python to add a delay in the execution of our program.
+
+```python
+import time
+
+print("Start")
+
+time.sleep(5)  # Number of seconds to pause the execution
+
+print("End")
+```
+
+## Example 5: Measuring the execution time of a Python code
+
+In this example, we will learn how to use the time module in Python to measure the time taken to execute a Python code.
+
+```python
+import time
+
+start_time = time.time()
+
+# Your code here
+result = 0
+for i in range(1000000):
+    result += i
+
+end_time = time.time()
+
+print("Execution Time:", end_time - start_time)
+```

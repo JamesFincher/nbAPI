@@ -9,7 +9,6 @@ from fastapi.responses import JSONResponse
 import nbformat as nbf
 from typing import Optional
 from dotenv import load_dotenv
-import uvicorn
 
 
 # Load the environment variables from .env file
@@ -105,6 +104,31 @@ async def create_notebook(input_file: UploadFile = File(...), output: Optional[s
     with open(input_file.filename, "r", encoding="utf-8") as f:
         txt = f.read()
 
+    nb = parse_input_text(txt)
+
+    with open(output, 'w', encoding='utf-8') as f:
+        nbf.write(nb, f)
+
+    with open(output, "r", encoding="utf-8") as f:
+        contents = f.read()
+
+    contents_base64 = base64.b64encode(contents.encode("utf-8")).decode("utf-8")
+    commit_message = f"Created {output} via FastAPI"
+    github_url = create_github_file(output, contents_base64, commit_message)
+
+    return JSONResponse(content={"result": f"Notebook '{output}' created successfully.", "github_url": github_url})
+
+@app.post("/create_notebook_text/")
+async def create_notebook_text(input_text: str , output: Optional[str] = 'output.ipynb'):
+    # If the output is not provided, assign a unique file name
+    if output == 'output.ipynb' or None:
+        timestamp = int(time.time())
+        random_hash = uuid.uuid4().hex[:8]
+        output = f"output_{timestamp}_{random_hash}.ipynb"
+
+   
+    txt = input_text
+    print(txt)
     nb = parse_input_text(txt)
 
     with open(output, 'w', encoding='utf-8') as f:
