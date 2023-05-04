@@ -1,3 +1,6 @@
 fastapi
 uvicorn
 requests
+nbformat
+typing
+dotenv
