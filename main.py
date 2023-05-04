@@ -9,6 +9,8 @@ from fastapi.responses import JSONResponse
 import nbformat as nbf
 from typing import Optional
 from dotenv import load_dotenv
+import uvicorn
+
 
 # Load the environment variables from .env file
 load_dotenv()
@@ -116,3 +118,6 @@ async def create_notebook(input_file: UploadFile = File(...), output: Optional[s
     github_url = create_github_file(output, contents_base64, commit_message)
 
     return JSONResponse(content={"result": f"Notebook '{output}' created successfully.", "github_url": github_url})
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=os.getenv("PORT", default=5000), log_level="info")
