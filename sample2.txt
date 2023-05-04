@@ -1,0 +1,112 @@
+# Code Examples using uuid module in Python
+
+## Example 1: Create a UUID using the `uuid.uuid1()` function
+
+```python
+import uuid
+
+generated_uuid = uuid.uuid1()
+print(f"Generated UUID (UUID1): {generated_uuid}")
+```
+
+## Example 2: Create a UUID using the `uuid.uuid3()` function
+
+```python
+import uuid
+
+namespace = uuid.NAMESPACE_DNS
+name = "example.com"
+generated_uuid = uuid.uuid3(namespace, name)
+print(f"Generated UUID (UUID3): {generated_uuid}")
+```
+
+## Example 3: Create a UUID using the `uuid.uuid4()` function
+
+```python
+import uuid
+
+generated_uuid = uuid.uuid4()
+print(f"Generated UUID (UUID4): {generated_uuid}")
+```
+
+## Example 4: Create a UUID using the `uuid.uuid5()` function
+
+```python
+import uuid
+
+namespace = uuid.NAMESPACE_DNS
+name = "example.com"
+generated_uuid = uuid.uuid5(namespace, name)
+print(f"Generated UUID (UUID5): {generated_uuid}")
+```
+
+## Example 5: Check if a string is a valid UUID
+
+```python
+import uuid
+
+def is_valid_uuid(string):
+    try:
+        uuid.UUID(string)
+        return True
+    except ValueError:
+        return False
+
+test_uuid = "e0b9522d-ff44-4e42-81b7-93257a519e78"
+
+print(f"Is '{test_uuid}' a valid UUID? {is_valid_uuid(test_uuid)}")
+```
+
+## Example 6: Get the namespace UUID for URL, DNS, and OID
+
+```python
+import uuid
+
+print(f"Namespace UUID for URL: {uuid.NAMESPACE_URL}")
+print(f"Namespace UUID for DNS: {uuid.NAMESPACE_DNS}")
+print(f"Namespace UUID for OID: {uuid.NAMESPACE_OID}")
+```
+
+## Example 7: Convert a UUID to a string
+
+```python
+import uuid
+
+generated_uuid = uuid.uuid4()
+uuid_string = str(generated_uuid)
+print(f"UUID as a string: {uuid_string}")
+```
+
+## Example 8: Create a UUID object from a string
+
+```python
+import uuid
+
+uuid_string = "e0b9522d-ff44-4e42-81b7-93257a519e78"
+uuid_object = uuid.UUID(uuid_string)
+print(f"UUID object from the string: {uuid_object}")
+```
+
+## Example 9: Get the variant and version info of a UUID
+
+```python
+import uuid
+
+generated_uuid = uuid.uuid4()
+print(f"Generated UUID: {generated_uuid}")
+print(f"UUID variant: {generated_uuid.variant}")
+print(f"UUID version: {generated_uuid.version}")
+```
+
+## Example 10: Compare two UUIDs
+
+```python
+import uuid
+
+uuid1 = uuid.uuid4()
+uuid2 = uuid.uuid4()
+
+print(f"UUID1: {uuid1}")
+print(f"UUID2: {uuid2}")
+print(f"Is UUID1 equal to UUID2? {uuid1 == uuid2}")
+```

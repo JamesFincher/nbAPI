@@ -1,5 +1,4 @@
 import base64
-import configparser
 import os
 import requests
 import shutil
@@ -9,16 +8,16 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 import nbformat as nbf
 from typing import Optional
+from dotenv import load_dotenv
 
-# Read the configuration values from config.ini
-config = configparser.ConfigParser()
-config.read("config.ini")
+# Load the environment variables from .env file
+load_dotenv()
 
 # Configure these according to your GitHub setup
-GITHUB_TOKEN = config.get("GITHUB", "token")
-REPO_OWNER = config.get("GITHUB", "repo_owner")
-REPO_NAME = config.get("GITHUB", "repo_name")
-BRANCH_NAME = config.get("GITHUB", "branch_name")
+GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
+REPO_OWNER = os.environ["REPO_OWNER"]
+REPO_NAME = os.environ["REPO_NAME"]
+BRANCH_NAME = os.environ["BRANCH_NAME"]
 
 app = FastAPI()
 print(GITHUB_TOKEN, REPO_OWNER)
@@ -88,9 +87,9 @@ def create_github_file(file_path, file_content, commit_message):
         raise HTTPException(status_code=response.status_code, detail="Error creating file on GitHub")
 
 @app.post("/create_notebook/")
-async def create_notebook(input_file: UploadFile = File(...), output: Optional[str] = None):
+async def create_notebook(input_file: UploadFile = File(...), output: Optional[str] = 'output.ipynb'):
     # If the output is not provided, assign a unique file name
-    if output is None:
+    if output == 'output.ipynb' or None:
         timestamp = int(time.time())
         random_hash = uuid.uuid4().hex[:8]
         output = f"output_{timestamp}_{random_hash}.ipynb"
