@@ -1,0 +1,68 @@
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
+import nbformat as nbf
+import shutil
+
+app = FastAPI()
+
+def parse_input_text(text: str) -> str:
+    nb = nbf.v4.new_notebook()
+
+    cell_type = None
+    cell_content = ""
+
+    for line in text.splitlines():
+        cell_type, cell_content = process_line(line, cell_type, cell_content, nb)
+
+    # Append the last cell
+    append_cell(cell_type, cell_content, nb)
+
+    return nb
+
+def process_line(line, cell_type, cell_content, nb):
+    if line.startswith("# "):
+        append_cell(cell_type, cell_content, nb)
+        cell_content = f"<h1>{line[1:].strip()}</h1>\n"
+        cell_type = "markdown"
+    elif line.startswith("## "):
+        append_cell(cell_type, cell_content, nb)
+        cell_content = f"<h2>{line[2:].strip()}</h2>\n"
+        cell_type = "markdown"
+    elif line.startswith("```python"):
+        append_cell(cell_type, cell_content, nb)
+        cell_type = "code"
+        cell_content = ""
+    elif line.startswith("```"):
+        append_cell(cell_type, cell_content, nb, is_code=True)
+        cell_type = None
+    else:
+        if cell_type:
+            cell_content += line + "\n"
+
+    return cell_type, cell_content
+
+
+
+
+def append_cell(cell_type, cell_content, nb, is_code=False):
+    if not cell_type:
+        return
+    cell = nbf.v4.new_markdown_cell(cell_content) if cell_type == "markdown" else nbf.v4.new_code_cell(cell_content)
+    nb.cells.append(cell)
+    if is_code:
+        nb.cells.append(nbf.v4.new_code_cell(cell_content))
+
+@app.post("/create_notebook/")
+async def create_notebook(input_file: UploadFile = File(...), output: str = "output.ipynb"):
+    with open(input_file.filename, "wb") as buffer:
+        shutil.copyfileobj(input_file.file, buffer)
+
+    with open(input_file.filename, "r", encoding="utf-8") as f:
+        txt = f.read()
+
+    nb = parse_input_text(txt)
+
+    with open(output, 'w', encoding='utf-8') as f:
+        nbf.write(nb, f)
+
+    return JSONResponse(content={"result": f"Notebook '{output}' created successfully."})
