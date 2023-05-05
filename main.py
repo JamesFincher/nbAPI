@@ -5,7 +5,6 @@ import shutil
 import time
 import uuid
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 import nbformat as nbf
 from typing import Optional
@@ -144,23 +143,146 @@ async def create_notebook_text(input_text: str , output: Optional[str] = 'output
 
     return JSONResponse(content={"result": f"Notebook '{output}' created successfully.", "github_url": github_url})
 
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
 
-        title="nbAPI",
-        version="2.5.0",
-        description="This api is used to convert markdown to jupyter notebook and push it to github",
-        routes=app.routes,
-        url="https://nbapi.fincher.dev/"
-        
-    )
-    openapi_schema["info"]["x-logo"] = {
-        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+@app.get("/spec")
+async def openapi_spec():
+    spec =  {
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/create_notebook/": {
+      "post": {
+        "summary": "Create Notebook",
+        "operationId": "create_notebook_create_notebook__post",
+        "parameters": [
+          {
+            "required": "false",
+            "schema": {
+              "title": "Output",
+              "type": "string",
+              "default": "output.ipynb"
+            },
+            "name": "output",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_notebook_create_notebook__post"
+              }
+            }
+          },
+          "required": 'true'
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
+  },
+  "components": {
+    "schemas": {
+      "Body_create_notebook_create_notebook__post": {
+        "title": "Body_create_notebook_create_notebook__post",
+        "required": [
+          "input_file"
+        ],
+        "type": "object",
+        "properties": {
+          "input_file": {
+            "title": "Input File",
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "HTTPValidationError": {
+        "title": "HTTPValidationError",
+        "type": "object",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "title": "ValidationError",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "loc": {
+            "title": "Location",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            }
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
 
+    return spec
 
-app.openapi = custom_openapi
