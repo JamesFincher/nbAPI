@@ -296,7 +296,7 @@ def custom_openapi():
         version="0.1.0",
         description="This is a very custom OpenAPI schema",
         routes=app.routes,
-        servers=[{"url": "https://nbapi.fincher.dev/"}],
+        servers=[{"url": "https://nbapi.fincher.dev"}],
 
     )
     openapi_schema["info"]["x-logo"] = {
