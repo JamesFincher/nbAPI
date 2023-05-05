@@ -5,24 +5,18 @@ import shutil
 import time
 import uuid
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 import nbformat as nbf
 from typing import Optional
-from dotenv import load_dotenv
-
-
-# Load the environment variables from .env file
-load_dotenv()
 
 # Configure these according to your GitHub setup
-GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
-REPO_OWNER = os.environ["REPO_OWNER"]
-REPO_NAME = os.environ["REPO_NAME"]
-BRANCH_NAME = os.environ["BRANCH_NAME"]
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")  # Replace with your own token or read from environment variables
+REPO_OWNER = 'your-username'  # Replace with your own GitHub username
+REPO_NAME = 'your-repo'  # Replace with your own GitHub repository name
+BRANCH_NAME = 'main'  # Replace with the branch you want to commit the files to
 
 app = FastAPI()
-print(GITHUB_TOKEN, REPO_OWNER)
+
 def parse_input_text(text: str) -> str:
     nb = nbf.v4.new_notebook()
 
@@ -87,14 +81,11 @@ def create_github_file(file_path, file_content, commit_message):
         return response.json()['content']['html_url']
     else:
         raise HTTPException(status_code=response.status_code, detail="Error creating file on GitHub")
-@app.get('/')
-async def root():
-    return {"message": "Hello World... API is working fine"}
 
 @app.post("/create_notebook/")
-async def create_notebook(input_file: UploadFile = File(...), output: Optional[str] = 'output.ipynb'):
+async def create_notebook(input_file: UploadFile = File(...), output: Optional[str] = None):
     # If the output is not provided, assign a unique file name
-    if output == 'output.ipynb' or None:
+    if output is None:
         timestamp = int(time.time())
         random_hash = uuid.uuid4().hex[:8]
         output = f"output_{timestamp}_{random_hash}.ipynb"
@@ -118,49 +109,3 @@ async def create_notebook(input_file: UploadFile = File(...), output: Optional[s
     github_url = create_github_file(output, contents_base64, commit_message)
 
     return JSONResponse(content={"result": f"Notebook '{output}' created successfully.", "github_url": github_url})
-
-@app.post("/create_notebook_text/")
-async def create_notebook_text(input_text: str , output: Optional[str] = 'output.ipynb'):
-    # If the output is not provided, assign a unique file name
-    if output == 'output.ipynb' or None:
-        timestamp = int(time.time())
-        random_hash = uuid.uuid4().hex[:8]
-        output = f"output_{timestamp}_{random_hash}.ipynb"
-
-   
-    txt = input_text
-    print(txt)
-    nb = parse_input_text(txt)
-
-    with open(output, 'w', encoding='utf-8') as f:
-        nbf.write(nb, f)
-
-    with open(output, "r", encoding="utf-8") as f:
-        contents = f.read()
-
-    contents_base64 = base64.b64encode(contents.encode("utf-8")).decode("utf-8")
-    commit_message = f"Created {output} via FastAPI"
-    github_url = create_github_file(output, contents_base64, commit_message)
-
-    return JSONResponse(content={"result": f"Notebook '{output}' created successfully.", "github_url": github_url})
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-
-        title="nbAPI",
-        version="2.5.0",
-        description="This api is used to convert markdown to jupyter notebook and push it to github",
-        routes=app.routes,
-        url="https://nbapi.fincher.dev/"
-        
-    )
-    openapi_schema["info"]["x-logo"] = {
-        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
-    }
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-
-app.openapi = custom_openapi

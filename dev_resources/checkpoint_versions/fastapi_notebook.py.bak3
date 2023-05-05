@@ -5,7 +5,6 @@ import shutil
 import time
 import uuid
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 import nbformat as nbf
 from typing import Optional
@@ -144,23 +143,3 @@ async def create_notebook_text(input_text: str , output: Optional[str] = 'output
 
     return JSONResponse(content={"result": f"Notebook '{output}' created successfully.", "github_url": github_url})
 
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-
-        title="nbAPI",
-        version="2.5.0",
-        description="This api is used to convert markdown to jupyter notebook and push it to github",
-        routes=app.routes,
-        url="https://nbapi.fincher.dev/"
-        
-    )
-    openapi_schema["info"]["x-logo"] = {
-        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
-    }
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-
-app.openapi = custom_openapi
