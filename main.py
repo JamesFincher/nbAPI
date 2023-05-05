@@ -9,6 +9,8 @@ from fastapi.responses import JSONResponse
 import nbformat as nbf
 from typing import Optional
 from dotenv import load_dotenv
+#custom openapi spec
+from fastapi.openapi.utils import get_openapi
 
 
 # Load the environment variables from .env file
@@ -286,3 +288,22 @@ async def openapi_spec():
 
     return spec
 
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="FastAPI",
+        version="0.1.0",
+        description="This is a very custom OpenAPI schema",
+        routes=app.routes,
+        servers=[{"url": "https://nbapi.fincher.dev/"}],
+
+    )
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
